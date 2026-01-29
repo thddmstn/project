@@ -1,0 +1,19 @@
+  1 # 1. BeEF 공격 차단 (핵심)
+  2 # BeEF의 기본 통신 스크립트인 hook.js 요청을 차단합니다.
+  3 drop tcp any any -> 172.16.0.0/24 80 (msg:"BEEF Hooking Attempt Detected"; content:"ho    ok.js"; http_uri; sid:1000050; rev:1;)
+  4 # BeEF 관리자 패널 접근 시도를 차단합니다.
+  5 drop tcp any any -> 172.16.0.0/24 80 (msg:"BEEF Admin Panel Access Attempt"; content:"    /ui/panel/"; http_uri; sid:1000051; rev:1;)
+  6 
+  7 # 2. 네트워크 스캔 방어
+  8 drop tcp any any -> 172.16.0.0/24 any (msg:"SCAN TCP SYN Scan"; flags:S; threshold:typ    e both, track by_src, count 20, seconds 10; sid:1000001; rev:1;)
+  9 drop icmp any any -> 172.16.0.0/24 any (msg:"SCAN ICMP Sweep"; itype:8; threshold:type     both, track by_src, count 5, seconds 1; sid:1000002; rev:1;)
+ 10 
+ 11 # 3. 서버 강제 침입 방어 (SSH)
+ 12 drop tcp any any -> 172.16.0.0/24 22 (msg:"AUTH SSH Brute Force"; flow:to_server; thre    shold:type both, track by_src, count 5, seconds 60; sid:1000010; rev:1;)
+ 13 
+ 14 # 4. 데이터베이스 보호
+ 15 drop tcp any any -> 172.16.0.0/24 3306 (msg:"DB MySQL Access Attempt"; flow:to_server;     sid:1000020; rev:1;)
+ 16 
+ 17 # 5. 서비스 거부 공격 방어 (DoS)
+ 18 drop tcp any any -> 172.16.0.0/24 any (msg:"DOS SYN Flood"; flags:S; threshold:type bo    th, track by_src, count 100, seconds 1; sid:1000030; rev:1;)
+~                                                                   
